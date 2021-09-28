@@ -2,7 +2,14 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Go Lang Lambda Deployed using AWS CDK.
+Golang Gin Lambda Deployed using AWS CDK.
+
+## Prerequisites
+
+- AWS CLI Configuration
+- AWS CDK
+- GO
+- Docker
 
 ## Getting Started
 
