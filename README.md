@@ -32,5 +32,3 @@ userService.addProxy({
   defaultIntegration: userServiceIntegration,
 });
 ```
-
-## Liscense
