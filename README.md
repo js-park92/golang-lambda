@@ -15,7 +15,7 @@ Golang Gin Lambda Deployed using AWS CDK.
 
 In order to deploy the stack to AWS, use CDK CLI within `cdk` folder.
 
-```
+```bash
 cd cdk
 cdk synth
 cdk deploy --all
@@ -25,17 +25,6 @@ All the Go codes are located in services folder. Use `GoServiceLambda` function 
 
 User Endpoint Example:
 
-```
-// User endpoint
-const userService = api.root.addResource("users");
-const userServiceLambda = this.GoServiceLambda(
-  this,
-  "user-service",
-  path.join(__dirname, "../../services/users")
-);
-const userServiceIntegration = new LambdaIntegration(userServiceLambda);
-userService.addProxy({
-  anyMethod: true,
-  defaultIntegration: userServiceIntegration,
-});
+```ts
+this.addService(api, "SERVICE_NAME");
 ```

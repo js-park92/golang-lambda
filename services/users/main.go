@@ -19,6 +19,11 @@ func init() {
 
 	users := r.Group("users")
 
+	users.GET("/", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"message": "This is user service",
+		})
+	})
 	users.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "pong",
