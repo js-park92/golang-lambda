@@ -21,17 +21,17 @@ interface RestApiStackProps extends StackProps {
    * @example <caption>Name of the identity provider</caption>
    * { identityProvider: "okta" }
    */
-  identityProvider: string;
+  identityProvider?: string;
   /**
    * @example <caption>URL for the identity issuer</caption>
    * { identityIssuerUrl: "https://dev-1234.okta.com/oauth2/default" }
    */
-  identityIssuerUrl: string;
+  identityIssuerUrl?: string;
   /**
    * @example <caption>List of the identity audiences</caption>
    * { identityProvider: ["api://default"] }
    */
-  identityAudience: string[];
+  identityAudience?: string[];
 }
 
 export class RestApiStack extends Stack {
@@ -45,24 +45,28 @@ export class RestApiStack extends Stack {
       },
     });
 
-    const authorizer = new HttpJwtAuthorizer({
-      authorizerName: props.identityProvider,
-      jwtIssuer: props.identityIssuerUrl,
-      jwtAudience: props.identityAudience,
-    });
+    let authorizer;
+
+    if (
+      props.identityAudience &&
+      props.identityIssuerUrl &&
+      props.identityProvider
+    ) {
+      authorizer = new HttpJwtAuthorizer({
+        authorizerName: props.identityProvider,
+        jwtIssuer: props.identityIssuerUrl,
+        jwtAudience: props.identityAudience,
+      });
+    }
 
     // User endpoint
-    this.addService(api, "users", { authorizer, scopes: ["user:read"] });
+    this.addService(api, "users", authorizer);
 
     // Organization endpoint
     // this.addService(api, "organizations");
   }
 
-  addService(
-    api: HttpApi,
-    name: string,
-    auth?: { authorizer: IHttpRouteAuthorizer; scopes: string[] }
-  ) {
+  addService(api: HttpApi, name: string, auth?: IHttpRouteAuthorizer) {
     const serviceLambda = new GoFunction(this, `${name}-service`, {
       entry: path.join(__dirname, `../../services/${name}`),
     });
@@ -70,19 +74,23 @@ export class RestApiStack extends Stack {
       handler: serviceLambda,
       payloadFormatVersion: PayloadFormatVersion.VERSION_1_0,
     });
+    const scopes = JSON.parse(
+      process.env[`${name.toUpperCase()}_SCOPES`] || "[]"
+    );
+    const props = {
+      integration: serviceIntegration,
+      authorizer: auth,
+      authorizationScopes: scopes,
+    };
     // proxy route
     api.addRoutes({
       path: `/${name}/{proxy+}`,
-      integration: serviceIntegration,
-      authorizer: auth?.authorizer,
-      authorizationScopes: auth?.scopes,
+      ...props,
     });
     // root route
     api.addRoutes({
       path: `/${name}`,
-      integration: serviceIntegration,
-      authorizer: auth?.authorizer,
-      authorizationScopes: auth?.scopes,
+      ...props,
     });
   }
 }
