@@ -10,7 +10,7 @@ Golang Gin Lambda Deployed using AWS CDK.
 - AWS CDK
 - GO
 - Docker
-
+#
 ## Getting Started
 
 In order to deploy the stack to AWS, use CDK CLI within `cdk` folder.
@@ -27,4 +27,31 @@ User Endpoint Example:
 
 ```ts
 this.addService(api, "SERVICE_NAME");
+```
+
+#
+## Adding Third Party Authorization
+Using thrid party IDP service for authoization. (e.g. Okta, Auth0)
+
+```bash
+cd cdk
+cp .env.example .env
+```
+
+Edit `.env` file according to your IDP setup.
+
+```
+# Okta example
+IDENTITY_PROVIDER=okta
+IDENTITY_ISSUER_URL=dev-1234.okta.com/oauth2/default
+IDENTITY_AUDIENCE=["api://default"]
+```
+
+Protect specific endpoints using scopes in `cdk/lib/api-gateway-stack.ts` by adding a environment variable. Scopes will default to empty array when no environment variable is provided.
+
+```
+# User Service Scopes
+USERS_SCOPES=["user:write"]
+# Organizations Service Scopes
+ORGANIZATIONS_SCOPES=["org:admin"]
 ```
